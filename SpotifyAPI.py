@@ -1,9 +1,7 @@
-from os import access
 import requests, base64, hashlib, secrets, string
 from urllib.parse import urlparse, parse_qs
 import webbrowser
 from decouple import config
-from datetime import datetime, timedelta
 from os.path import split
 
 
@@ -48,46 +46,42 @@ class SpotifyApi:
             "code_verifier": self.code_verifier
         }
         r = requests.post(self.token_url, data=request_body)
-        self.response_data  = r.json()
-        self.token_expiry_time = datetime.now() + timedelta(seconds=self.response_data['expires_in'])
+        self.response_data = r.json()
         return True
-    
-    def get_access_token(self):
-        data = self.response_data
-        access_token = data['access_token']
-        now = datetime.now()
-        if now > self.token_expiry_time:
-            request_body = {
-                "grant_type": "refresh_token",
-                "refresh_token": data['refresh_token'],
-                'client_id': self.client_id
-            }
-            r = requests.post(self.token_url, data=request_body)
-            access_token = r.json()['access_token']
-        return access_token
 
 
     def get_playlist_items(self):
-        access_token = self.get_access_token()
+        access_token = self.response_data['access_token']
         header = {
             "Authorization": f"Bearer {access_token}"
         }
         playlist_url = config("playlist_url")
         playlist_path = urlparse(playlist_url).path
-        playlist_id = split(playlist_path)[1]
-        playlist_items_url = f"{self.spotify_api}/{playlist_id}/tracks?limit=10"
+        self.playlist_id = split(playlist_path)[1]
+        playlist_items_url = f"{self.spotify_api}/{self.playlist_id}/tracks"
         r = requests.get(playlist_items_url, headers=header)
-        playlist_items = r.json()
-        print(playlist_items)
+        response = r.json()
+        playlist_items = response['items']
         return playlist_items
-        
-        
-if __name__ == "__main__":
-    s = SpotifyApi()
-    s.open_authorize_url()
-    auth_redirect_uri = input("Copy and paste the url you were redirected to here.\n")
-    s.perform_authorization(auth_redirect_uri=auth_redirect_uri)
-    s.get_playlist_items()
     
+    def get_track_names_from_playlist_items(self):
+        playlist_items = self.get_playlist_items()
+        track_names = []
+        for playlist_item in playlist_items:
+            artists = [artist['name'] for artist in playlist_item['track']['artists']]
+            for artist in artists:
+                track_name = playlist_item['track']['name'] + " " + artist
+                print(f"Fetching {playlist_item['track']['name']} from spotify.")
+            track_names.append(track_name)
+        return track_names
 
-    
+    def get_playlist_name(self):
+        access_token = self.response_data['access_token']
+        playlist_id = self.playlist_id
+        header = {
+            "Authorization": f"Bearer {access_token}"
+        }
+        r = requests.get(f"{self.spotify_api}/{playlist_id}", headers=header)
+        data = r.json()
+        playlist_name = data['name']
+        return playlist_name
