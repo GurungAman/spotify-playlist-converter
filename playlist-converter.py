@@ -1,4 +1,3 @@
-from requests.api import patch
 from SpotifyAPI import SpotifyApi
 from YoutubeAPI import YoutubeApi
 

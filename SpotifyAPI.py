@@ -7,7 +7,7 @@ from os.path import split
 
 class SpotifyApi:
     def __init__(self) -> None:
-        self.client_id = config("client_id")
+        self.client_id = config("spotify_client_id")
         self.base_url = "https://accounts.spotify.com"
         self.redirect_uri = "http://127.0.0.1:8000/"
         self.spotify_api= f"https://api.spotify.com/v1/playlists"
