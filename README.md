@@ -10,7 +10,7 @@ Check instructions below on how configure those settings.
 
 1. Register and create an app from spotify [dashboard](https://developer.spotify.com/dashboard/). Spotify will provide you with a Client ID. 
     - In .env file copy and paste the id inside "spotify_client_id".
-    - Copy the url of spotify playlist thay you want to convert and paste it in "playlist_url".
+    - Copy the url of spotify playlist that you want to convert and paste it in "playlist_url".
     - Inside your spoitfy application open edit settings and set Redirect URI to :```http://127.0.0.1:8000/```
 
 2. Open [google develoeprs console](https://console.cloud.google.com/apis/credentials). 
